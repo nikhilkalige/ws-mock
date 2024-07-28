@@ -374,10 +374,14 @@ impl WsMockServer {
         }
 
         while let Some(Ok(msg)) = recv.next().await {
-            let text = msg.to_text().expect("Message was not text").to_string();
-            debug!("Received: '{:?}'", text);
-
-            Self::match_mocks(state.clone(), mpsc_send.clone(), text.as_str()).await;
+            match msg {
+                Message::Text(_) => {
+                    let text = msg.to_text().expect("Message was not text").to_string();
+                    debug!("Received: '{:?}'", text);
+                    Self::match_mocks(state.clone(), mpsc_send.clone(), text.as_str()).await;
+                }
+                _ => ()
+            }
         }
     }
 
